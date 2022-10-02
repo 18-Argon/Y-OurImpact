@@ -87,3 +87,17 @@ class Object:
 
     def get_price(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
+
+def generateData():
+    supplierIndex = 0
+    objIndex = 0
+    for cityIndex in range(n_cities):
+        for i in range(max_suppliers_per_city):
+            sup = Supplier(cityIndex, supplierIndex)
+            for objType in sup.objects:
+                Object(cityIndex, supplierIndex, objIndex, objType)
+                objType += 1
+            supplierIndex += 1
+
+print()
+
