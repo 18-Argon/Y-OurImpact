@@ -22,6 +22,10 @@ random.seed(0)
 city_to_supplier_dict={}
 supplier_to_obj_dict={}
 
+suppliers=[]
+cities=[]
+objects=[]
+
 
 def generate_random_graph(n, p):
     V = set([v for v in range(n)])
@@ -65,6 +69,8 @@ class City:
         self.city_base_price = random.randint(
             MINCITYPRICE_RANDRANGE[0], MINCITYPRICE_RANDRANGE[1])
 
+        cities.append(self)
+
 
 class Supplier:
     city_index = 0
@@ -76,11 +82,13 @@ class Supplier:
         self.city_index = city_index
         self.supplier_index = supplier_index
 
-        self.supplier_csr = random.triangular(0, 50, 100)
+        self.supplier_csr = random.triangular(0, cities[city_index].city_mean_CSR, 100)
 
         while len(self.supplier_object_types)==0: # Ensure atleast one object per supplier
             self.supplier_object_types = random.choices(
                 [i for i in range(n_object_types)], k=random.randint(0, n_object_types))
+        
+        suppliers.append(self)
 
 
 class Object:
@@ -101,7 +109,9 @@ class Object:
 
         self.rating = random.triangular(0, 2.5, 5)
         self.material = random.randint(0, 5)
-        self.obj_base_price = random.randint(0, 100)
+        self.obj_base_price = random.randint(0, 100) + cities[city_index].city_base_price
+
+        objects.append(self)
 
     def get_price(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
@@ -112,6 +122,7 @@ def generateData():
     supplierIndex = 0
     objIndex = 0
     for cityIndex in range(n_cities):
+        City(cityIndex)
         city_to_supplier_dict[cityIndex]=[]
         for i in range(max_suppliers_per_city):
             sup = Supplier(cityIndex, supplierIndex)
@@ -126,7 +137,6 @@ def generateData():
             supplierIndex += 1
             
 
-
 generateData()
-# print()
+print()
 
