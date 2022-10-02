@@ -13,9 +13,9 @@ MINCITYPRICE_RANDRANGE = (0, 10)
 CITYPRICE_RANGE = (0, 100)
 OBJPRICE_RANGE = (10, 100)
 
-n_cities = 20
-max_suppliers_per_city = 5
-n_object_types = 30
+n_cities = 10
+max_suppliers_per_city = 3
+n_object_types = 10
 p_remove_edge = 0.4
 
 random.seed(0)
@@ -122,7 +122,7 @@ class Object:
 
         objects.append(self)
 
-    def get_price(self, delivery_city_index):
+    def update_price_by_delivery(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
 
     def new_F(self, delivery_city_index):
