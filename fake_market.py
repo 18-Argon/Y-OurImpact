@@ -126,7 +126,7 @@ def generateData():
             supplierIndex += 1
             
 
-objects
+
 generateData()
 # print()
 
