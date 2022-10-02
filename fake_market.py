@@ -19,6 +19,10 @@ p_remove_edge = 0.4
 random.seed(0)
 
 
+city_to_supplier_dict={}
+supplier_to_obj_dict={}
+
+
 def generate_random_graph(n, p):
     V = set([v for v in range(n)])
     E = set()
@@ -57,17 +61,26 @@ class City:
     def __init__(self, city_index):
         self.city_index = city_index
 
+        self.city_mean_CSR = random.randint(0, 100)
+        self.city_base_price = random.randint(
+            MINCITYPRICE_RANDRANGE[0], MINCITYPRICE_RANDRANGE[1])
+
 
 class Supplier:
     city_index = 0
     supplier_index = 0
     supplier_csr = random.triangular(0, 50, 100)
-    objects = random.choices(
-        [i for i in range(n_object_types)], k=random.randint(0, n_object_types))
+    supplier_object_types = []
 
     def __init__(self, city_index, supplier_index):
         self.city_index = city_index
         self.supplier_index = supplier_index
+
+        self.supplier_csr = random.triangular(0, 50, 100)
+
+        while len(self.supplier_object_types)==0: # Ensure atleast one object per supplier
+            self.supplier_object_types = random.choices(
+                [i for i in range(n_object_types)], k=random.randint(0, n_object_types))
 
 
 class Object:
@@ -82,22 +95,38 @@ class Object:
     def __init__(self, city_index, supplier_index, obj_index, obj_type):
         self.city_index = city_index
         self.supplier_index = supplier_index
+        self.obj_index=obj_index
         self.obj_type = obj_type
         self.rating*=1/(1+math.exp(-self.obj_base_price))
+
+        self.rating = random.triangular(0, 2.5, 5)
+        self.material = random.randint(0, 5)
+        self.obj_base_price = random.randint(0, 100)
 
     def get_price(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
 
 def generateData():
+    global city_to_supplier_dict
+    global supplier_to_obj_dict
     supplierIndex = 0
     objIndex = 0
     for cityIndex in range(n_cities):
+        city_to_supplier_dict[cityIndex]=[]
         for i in range(max_suppliers_per_city):
             sup = Supplier(cityIndex, supplierIndex)
-            for objType in sup.objects:
-                Object(cityIndex, supplierIndex, objIndex, objType)
-                objType += 1
-            supplierIndex += 1
+            city_to_supplier_dict[cityIndex].append(sup)
 
-print()
+            supplier_to_obj_dict[supplierIndex]=[]
+            for objType in sup.supplier_object_types:
+                obj=Object(cityIndex, supplierIndex, objIndex, objType)
+                supplier_to_obj_dict[supplierIndex].append(obj)
+                objIndex += 1
+                # print(objIndex)
+            supplierIndex += 1
+            
+
+objects
+generateData()
+# print()
 
