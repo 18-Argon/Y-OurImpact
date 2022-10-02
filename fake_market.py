@@ -13,9 +13,9 @@ MINCITYPRICE_RANDRANGE = (0, 10)
 CITYPRICE_RANGE = (0, 100)
 OBJPRICE_RANGE = (10, 100)
 
-n_cities = 10
-max_suppliers_per_city = 3
-n_object_types = 10
+n_cities = 20
+max_suppliers_per_city = 5
+n_object_types = 30
 p_remove_edge = 0.4
 
 random.seed(0)
