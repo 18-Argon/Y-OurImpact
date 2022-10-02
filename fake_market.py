@@ -4,7 +4,9 @@ from itertools import combinations
 import math
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 
+# HAVE NOT IMPLEMENTED FROM CITY SHIPPING COST YET
 PER_UNIT_SHIPPING_COST = 10
 
 MINCITYPRICE_RANDRANGE = (0, 10)
@@ -19,12 +21,12 @@ p_remove_edge = 0.4
 random.seed(0)
 
 
-city_to_supplier_dict={}
-supplier_to_obj_dict={}
+city_to_supplier_dict = {}
+supplier_to_obj_dict = {}
 
-suppliers=[]
-cities=[]
-objects=[]
+suppliers = []
+cities = []
+objects = []
 
 
 def generate_random_graph(n, p):
@@ -82,12 +84,13 @@ class Supplier:
         self.city_index = city_index
         self.supplier_index = supplier_index
 
-        self.supplier_csr = random.triangular(0, cities[city_index].city_mean_CSR, 100)
+        self.supplier_csr = random.triangular(
+            0, cities[city_index].city_mean_CSR, 100)
 
-        while len(self.supplier_object_types)==0: # Ensure atleast one object per supplier
+        while len(self.supplier_object_types) == 0:  # Ensure atleast one object per supplier
             self.supplier_object_types = random.choices(
                 [i for i in range(n_object_types)], k=random.randint(0, n_object_types))
-        
+
         suppliers.append(self)
 
 
@@ -96,25 +99,36 @@ class Object:
     city_index = 0
     obj_index = 0
     obj_type = 0
-    rating = random.triangular(0, 2.5, 5)
-    material = random.randint(0, 5)
+    rating = -random.triangular(0, 2.5, 5)
+    material = -random.randint(0, 5)
     obj_base_price = random.randint(0, 100)
+    F = np.array([])
 
     def __init__(self, city_index, supplier_index, obj_index, obj_type):
         self.city_index = city_index
         self.supplier_index = supplier_index
-        self.obj_index=obj_index
+        self.obj_index = obj_index
         self.obj_type = obj_type
-        self.rating*=1/(1+math.exp(-self.obj_base_price))
 
         self.rating = random.triangular(0, 2.5, 5)
+        self.rating *= 1/(1+math.exp(-self.obj_base_price))
+
         self.material = random.randint(0, 5)
-        self.obj_base_price = random.randint(0, 100) + cities[city_index].city_base_price
+        self.obj_base_price = random.randint(
+            0, 100) + cities[city_index].city_base_price
+
+        self.F = np.array([self.obj_index,-self.rating, -self.material, -
+                          suppliers[self.supplier_index].supplier_csr, self.obj_base_price])
 
         objects.append(self)
 
     def get_price(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
+
+    def new_F(self, delivery_city_index):
+        self.F[-1] = self.get_price(delivery_city_index)
+        return self.F
+
 
 def generateData():
     global city_to_supplier_dict
@@ -123,20 +137,19 @@ def generateData():
     objIndex = 0
     for cityIndex in range(n_cities):
         City(cityIndex)
-        city_to_supplier_dict[cityIndex]=[]
+        city_to_supplier_dict[cityIndex] = []
         for i in range(max_suppliers_per_city):
             sup = Supplier(cityIndex, supplierIndex)
             city_to_supplier_dict[cityIndex].append(sup)
 
-            supplier_to_obj_dict[supplierIndex]=[]
+            supplier_to_obj_dict[supplierIndex] = []
             for objType in sup.supplier_object_types:
-                obj=Object(cityIndex, supplierIndex, objIndex, objType)
+                obj = Object(cityIndex, supplierIndex, objIndex, objType)
                 supplier_to_obj_dict[supplierIndex].append(obj)
                 objIndex += 1
                 # print(objIndex)
             supplierIndex += 1
-            
+
 
 generateData()
 print()
-
