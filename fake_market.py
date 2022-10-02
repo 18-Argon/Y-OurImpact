@@ -117,12 +117,12 @@ class Object:
         self.obj_base_price = random.randint(
             0, 100) + cities[city_index].city_base_price
 
-        self.F = np.array([self.obj_index,-self.rating, -self.material, -
+        self.F = np.array([self.obj_index, self.obj_type, -self.rating, -self.material, -
                           suppliers[self.supplier_index].supplier_csr, self.obj_base_price])
 
         objects.append(self)
 
-    def get_price(self, delivery_city_index):
+    def update_price_by_delivery(self, delivery_city_index):
         return self.obj_base_price+PER_UNIT_SHIPPING_COST*nx.shortest_path_length(cities_graph, source=self.city_index, target=delivery_city_index)
 
     def new_F(self, delivery_city_index):
